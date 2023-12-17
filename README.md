@@ -1,3 +1,3 @@
-Frontend : Flutter
-Backend : Nodejs
+Frontend : Flutter , 
+Backend : Nodejs & 
 Database : MongoDB
