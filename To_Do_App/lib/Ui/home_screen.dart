@@ -12,14 +12,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            title: Text("To-Do App",style: TextStyle(fontWeight: FontWeight.bold,)),
-            backgroundColor: Colors.amberAccent,
-            centerTitle: true,
-          ),
-          body: Container(),
-        )
-    );
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text("To-Do App",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            )),
+        backgroundColor: Colors.amberAccent,
+        centerTitle: true,
+      ),
+      body: Container(
+        color: Colors.amber,
+      ),
+    ));
   }
 }
