@@ -11,3 +11,24 @@ exports.createTodo = async (req, res, next) => {
     }
 }
 
+
+exports.getTodo = async (req, res, next) => {
+    try {
+        const { userId } = req.body;
+        let getData = await ToDoService.getTodo(userId);
+        res.json({ status: true, success: getData })
+    } catch (error) {
+        throw error
+    }
+}
+
+exports.delTodo = async (req, res, next) => {
+    try {
+        const { id } = req.body;
+        let delData = await ToDoService.delTodo(id);
+        res.json({ status: true, success: delData });
+    } catch (error) {
+        throw error;
+    }
+
+}
