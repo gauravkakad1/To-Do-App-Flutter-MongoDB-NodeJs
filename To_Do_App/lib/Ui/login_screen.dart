@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:to_do_app/Components/round_button.dart';
 import 'package:to_do_app/Ui/home_screen.dart';
 import 'signup_screen.dart';
@@ -20,9 +21,27 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool isValid = true;
-
+  late SharedPreferences sp;
+  void initSharedpref()async{
+     sp = await SharedPreferences.getInstance();
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    initSharedpref();
+    super.initState();
+  }
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   void loginUser()async{
+    print("loginUser function called");
+
     if(emailController.text.isNotEmpty && passwordController.text.isNotEmpty){
       var reqUser = {
         "email":emailController.text,
@@ -32,12 +51,17 @@ class _LoginScreenState extends State<LoginScreen> {
           headers: {"Content-Type":"application/json"},
           body: jsonEncode(reqUser)
       );
+      print(response);
       var jsonResponse = jsonDecode(response.body);
+      print(jsonResponse['status']);
       if(jsonResponse['status']){
-        Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+        var mytoken = jsonResponse['token'];
+        sp.setString('token', mytoken);
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen(token: mytoken,)));
       }else{
         print('Something went wrong');
       }
+
        setState(() {
         isValid= true;
       });

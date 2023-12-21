@@ -5,7 +5,7 @@ const ToDoModel = require('./model/todo.model');
 const port = 3000;
 
 app.get('/', (req, res) => {
-    res.send("Hello World");
+    res.send("Welcome");
 });
 app.get('/home', (req, res) => {
     res.send("Home page"); ṇ

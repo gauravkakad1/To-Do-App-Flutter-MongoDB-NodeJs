@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:to_do_app/Ui/splash_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  var myToken = sp.getString('token')??"";
+  runApp( MyApp(myToken: myToken));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  final myToken;
+  const MyApp({Key? key, required this.myToken}) : super(key: key);
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -18,7 +22,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green
       ),
 
-      home: const SplashScreen(),
+      home: SplashScreen(token: myToken),
     );
   }
 }
