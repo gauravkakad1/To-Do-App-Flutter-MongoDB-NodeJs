@@ -12,5 +12,6 @@ app.get('/home', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log('running at => http://localhost:3000');
+    // console.log('running at => http://localhost:3000');
+    console.log('running at => http://192.168.247.185:3000');
 });

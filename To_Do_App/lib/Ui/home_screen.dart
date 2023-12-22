@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:to_do_app/Ui/login_screen.dart';
 import 'package:to_do_app/config/config.dart';
-import 'package:velocity_x/velocity_x.dart';
 
 class HomeScreen extends StatefulWidget {
   final token;
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late String userId;
   List itemsList=[];
 
+
   @override
   void initState() {
     super.initState();
@@ -27,10 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
     userId = jwtDecodedToken['_id'];
     getTodoList(userId);
   }
-
-  void addToDo() async  {
+  void addToDo() async {
     if (titleController.text.isNotEmpty && descController.text.isNotEmpty) {
-      var regBody = {
+      var reqBody = {
         "userId": userId,
         "title": titleController.text,
         "desc": descController.text,
@@ -38,34 +39,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
       var response = await http.post(
         Uri.parse(addToDoUrl),
-        body: jsonEncode(regBody),
+        body: jsonEncode(reqBody),
         headers: {"Content-Type": "application/json"},
       );
-      var jsonResponse = jsonDecode(response.body);
-      if (jsonResponse['status']) {
-        titleController.clear();
-        descController.clear();
-        Navigator.pop(context);
-        getTodoList(userId);
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['status']) {
+          titleController.clear();
+          descController.clear();
+          Navigator.pop(context);
+          getTodoList(userId);
+        } else {
+          print("Something went wrong: ${jsonResponse['message']}");
+        }
       } else {
-        print("Something went wrong");
+        print("Failed to add ToDo. Status code: ${response.statusCode}");
       }
     } else {
       print("Enter title and description");
     }
   }
-  void getTodoList(userId)async{
+
+  void getTodoList(userId) async {
     var reqBody = {
-      'userId' : userId
+      'userId': userId,
     };
-    var response = await http.post(Uri.parse(getToDoUrl),headers: {"Content-Type":"application/json"},body: jsonEncode(reqBody));
-    print(response);
-    var jsonResponse = jsonDecode(response.body);
 
-    itemsList = jsonResponse('success');
-    setState(() {
 
-    });
+    var response = await http.post(
+      Uri.parse(getToDoUrl),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(reqBody),
+    );
+
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      itemsList = jsonResponse['success'];
+
+      setState(() {
+      });
+    } else {
+      print("Error: ${response.statusCode}");
+    }
   }
   void delTodo(id)async{
     var reqBody =
@@ -79,6 +96,14 @@ class _HomeScreenState extends State<HomeScreen> {
      }
   }
 
+  void _logout()async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.clear();
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -89,7 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         appBar: AppBar(
           leading: Icon(Icons.menu),
-          actions: [Icon(Icons.logout)],
+          actions: [InkWell(child: Icon(Icons.logout),onTap: (){
+            _logout();
+          },)],
           automaticallyImplyLeading: false,
           centerTitle: true,
           title: Text(
@@ -146,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Card(
                        child: ListTile(
                          title: Text(itemsList[index]['title'].toString()),
-                         subtitle: Text(itemsList[index]['desc'].toString()),
+                         subtitle: Text(itemsList[index]['description'].toString()),
                          leading: Icon(Icons.task),
                          trailing: Icon(Icons.arrow_back),
                        ),

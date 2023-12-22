@@ -22,29 +22,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isValid = true;
 
   void registerUser() async{
-    if(emailController.text.isNotEmpty && passwordController.text.isNotEmpty){
+    if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
       var regBody = {
-        "email":emailController.text,
-        "password":passwordController.text
+        "email": emailController.text,
+        "password": passwordController.text
       };
-      var response = await http.post(Uri.parse(registerationUrl),
-          headers: {"Content-Type":"application/json"},
-          body: jsonEncode(regBody)
-      );
-      var jsonResponse = jsonDecode(response.body);
-      if(jsonResponse['status']){
-        Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
-      }else{
-        print("SomeThing Went Wrong");
+
+      try {
+        var response = await http.post(
+          Uri.parse(registerationUrl),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(regBody),
+        );
+
+        if (response.statusCode == 200) {
+          var jsonResponse = jsonDecode(response.body);
+
+          if (jsonResponse.containsKey('status') && jsonResponse['status']) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+          } else {
+            print("Registration failed: ${jsonResponse['message']}");
+          }
+        } else {
+          print("Failed to register. Status code: ${response.statusCode}");
+        }
+      } catch (error) {
+        print("Error during registration: $error");
       }
-      setState(() {
-        isValid = true;
-      });
-    }else{
-      setState(() {
-        isValid = false;
-      });
     }
+
+    setState(() {
+      isValid = emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
+    });
   }
 
   @override
